@@ -1,0 +1,23 @@
+{
+  "name": "primero",
+  "version": "1.0.0",
+  "description": "Creando el juego del Uno usando WebSockets con Typescript y Node.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./build/server.js",
+    "build": "tsc -p ./server/tsconfig.json",
+    "start:build": "tsc -p ./server/tsconfig.json | nodemon ./build/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "@types/ws": "^8.18.1",
+    "express": "^5.2.1",
+    "ws": "^8.19.0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "rootDir": "./",
+        "target": "es2022",
+        "module": "commonjs",
+        "outDir": "../build",
+        "sourceMap": true,
+        "noEmitOnError": true,
+        "noImplicitAny": true,
+        "strict": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true
+    }
+}
