@@ -1,0 +1,97 @@
+body {
+    background-color: rgb(0, 60, 0);
+    padding: 0;
+    margin: 0;
+}
+
+#game {
+    display: grid;
+    grid-template-rows: 30% 70%;
+    height: 100vh;
+}
+
+#controls {
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    background-color: magenta;
+}
+
+.users_container {
+    overflow-y: auto;
+}
+
+#users {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid black;
+}
+
+#users td {
+    border: 2px solid black;
+    padding: 5px;
+    padding-left: 10px;
+}
+
+.primero_button {
+    text-align: center;
+    justify-content: center;
+    align-content: center;
+    background-color: grey;
+}
+
+#primero {
+    background-color: red;
+    border: 2px solid black;
+    height: 80%;
+    aspect-ratio: 1 / 1;
+    border-radius: 100px;
+    cursor: pointer;
+}
+
+#primero:hover {
+    background-color: brown;
+}
+
+#deck, #table {
+    margin: 20px;
+    background-color: aqua;
+    border-radius: 20px;
+    text-align: center;
+    justify-content: center;
+    align-content: center;
+}
+
+#board {
+    display: flex;
+    flex-direction: row;
+    background-color: blueviolet;
+    width: 100%;
+}
+
+/* Card Component */
+.card {
+    display: flex;
+    height: 250px;
+    width: 150px;
+    border-radius: 20px;
+    justify-content: center;
+    align-items: center;
+    font-size: 10rem;
+    margin: 10px;
+}
+
+.card_red {
+    background-color: red;
+}
+
+.card_blue {
+    background-color: blue;
+}
+
+.card_green {
+    background-color: green;
+}
+
+.card_yellow {
+    background-color: yellow;
+}
