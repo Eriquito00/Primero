@@ -9,6 +9,15 @@ const cards = [
     new Card().createCard("blue", 2),
     new Card().createCard("green", 3),
     new Card().createCard("yellow", 4),
+    new Card().createCard("red", 5),
+    new Card().createCard("blue", 6),
+    new Card().createCard("green", 7),
+    new Card().createCard("yellow", 8),
+    new Card().createCard("red", 9),
+    new Card().createCard("blue", 0),
+    new Card().createCard("green", 3),
+    new Card().createCard("yellow", 6),
+    
 ];
 
 const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
