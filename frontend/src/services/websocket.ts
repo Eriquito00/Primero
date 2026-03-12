@@ -25,4 +25,8 @@ export class WebSocketService {
     send(data: object) {
         this.socket.send(JSON.stringify(data));
     }
+
+    getInstance() {
+        return this.socket;
+    }
 }
