@@ -94,3 +94,16 @@ dropZone.addEventListener("drop", (e) => {
 });
 
 deck.addEventListener("click", () => { addCardPlayer(); });
+
+/**
+ * Aqui falta gestionar aun:
+ *  - Cuando se acaba de entrar se tienen que cargar los jugadores por ws o wss
+ *  - Cuando se lleva una carta a la zona de lanzar
+ *  - Cuando se pide otra carta
+ *  - Cuando se le da al boton de primero:
+ *      - Si tiene 2 cartas y deja una no pasa nada
+ *      - Si tiene 2 cartas o mas despues de la jugada que se le penalice
+ *  - Cuando algun jugador lance alguna carta actualizar la tabla de jugadores
+ *  - Cuando algun jugador ya no tenga cartas el juego acaba con un alert
+ *    o lo que sea y se envia al inicio
+ */
