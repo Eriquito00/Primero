@@ -251,7 +251,3 @@ body {
     background: linear-gradient(135deg, rgb(255,200,0), rgb(180,150,0));
     color: black;
 }
-
-.card_drag {
-    background-color: white;
-}
