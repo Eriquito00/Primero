@@ -29,11 +29,6 @@ export class Card extends HTMLElement {
             draggedCard = null;
         });
 
-        card.addEventListener("mouseenter", (e) => { this.cardEnter(e); });
-        card.addEventListener("dragenter", (e) => { this.cardEnter(e); });
-        card.addEventListener("mouseleave", (e) => { this.cardLeave(e); });
-        card.addEventListener("dragleave", (e) => { this.cardLeave(e); });
-
         const cornerTop = createElement("div");
         addAtributes(cornerTop, { class: "card_corner card_corner_top" });
         addText(cornerTop, this.number.toString());
@@ -52,15 +47,7 @@ export class Card extends HTMLElement {
 
         return card;
     }
-
-    private cardEnter(e: Event) {
-        (e.target as HTMLElement).classList.add("card_drag");
-    }
-
-    private cardLeave(e: Event) {
-        (e.target as HTMLElement).classList.remove("card_drag");
-    }
-
+    
     public getCardData() {
         return {
             "color": this.color,
