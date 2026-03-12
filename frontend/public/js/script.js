@@ -7,16 +7,7 @@ create_room.addEventListener("click", () => { createRoom(username.value); });
 submit.addEventListener("click", () => { enterRoom(username.value, code.value); });
 function createRoom(username) {
     if (validateInfo(username)) {
-        /**
-         * Mandar el codigo y el username al backend
-         * EL CODIGO ES VALIDO
-         *      El backend se guarda el username y genera un codigo
-         *      de sala valido, manda al usuario a la pagina de room y
-         *      muestra el codigo ahi.
-         * EL CODIGO NO ES VALIDO
-         *      Sale un alert conforme el codigo de esa sala no es valido
-         */
-        window.location.href = "./room/";
+        connectWS(username);
     }
     else {
         alert("El username tiene que ser de 8 caracteres o mas y el codigo de 6 caracteres.");
@@ -24,20 +15,25 @@ function createRoom(username) {
 }
 function enterRoom(username, code) {
     if (validateInfo(username, code)) {
-        /**
-         * Mandar el codigo y el username al backend
-         * EL CODIGO ES VALIDO
-         *      El backend se guarda el username y asocia ese usuario
-         *      a la partida de ese codigo y se redirige a la sala en
-         *      de espera.
-         * EL CODIGO NO ES VALIDO
-         *      Sale un alert conforme el codigo de esa sala no es valido
-         */
-        window.location.href = "./room/";
+        connectWS(username, code);
     }
     else {
         alert("El username tiene que ser de 8 caracteres o mas y el codigo de 6 caracteres.");
     }
+}
+function connectWS(username, code) {
+    /**
+     * Abrir una conexion ws o wss.
+     * Mandar el codigo y el username al backend
+     * EL CODIGO ES VALIDO
+     *      El backend se guarda el username y asocia ese usuario
+     *      a la partida de ese codigo y se redirige a la sala en
+     *      de espera.
+     * EL CODIGO NO ES VALIDO
+     *      Sale un alert conforme el codigo de esa sala no es valido
+     */
+    const codigo = code === undefined ? "AAAAAA" : code;
+    window.location.href = `./room/index.html?code=${codigo}`;
 }
 function validateInfo(username, code) {
     if (code === undefined)

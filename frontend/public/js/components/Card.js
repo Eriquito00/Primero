@@ -21,10 +21,6 @@ export class Card extends HTMLElement {
         card.addEventListener("dragend", () => {
             draggedCard = null;
         });
-        card.addEventListener("mouseenter", (e) => { this.cardEnter(e); });
-        card.addEventListener("dragenter", (e) => { this.cardEnter(e); });
-        card.addEventListener("mouseleave", (e) => { this.cardLeave(e); });
-        card.addEventListener("dragleave", (e) => { this.cardLeave(e); });
         const cornerTop = createElement("div");
         addAtributes(cornerTop, { class: "card_corner card_corner_top" });
         addText(cornerTop, this.number.toString());
@@ -38,12 +34,6 @@ export class Card extends HTMLElement {
         card.appendChild(center);
         card.appendChild(cornerBottom);
         return card;
-    }
-    cardEnter(e) {
-        e.target.classList.add("card_drag");
-    }
-    cardLeave(e) {
-        e.target.classList.remove("card_drag");
     }
     getCardData() {
         return {
