@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer src="./../js/script.js"></script>
-    <link rel="icon" href="./assets/primero_logo.png" type="image/png">
+    <link rel="stylesheet" href="./../styles/room.css">
+    <script defer src="./../js/room.js"></script>
+    <link rel="icon" href="./../assets/primero_logo.png" type="image/png">
     <title>Primero</title>
 </head>
 <body>
-    <h1>ROOM</h1>
-    <textarea id="room_code" maxlength="6" readonly>
-    </textarea>
+    <div class="room_container">
+        <h1>ROOM</h1>
+        <textarea id="room_code" maxlength="6" readonly></textarea>
+        <button id="start_game">Empezar juego</button>
+    </div>
 </body>
 </html>
