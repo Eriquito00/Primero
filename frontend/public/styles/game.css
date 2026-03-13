@@ -4,6 +4,7 @@ html, body {
 
 body {
     background-color: rgb(0, 50, 0);
+    font-family: system-ui;
     padding: 0;
     margin: 0;
 }
@@ -48,10 +49,6 @@ body {
 
 #users tr {
     transition: background 0.15s ease;
-}
-
-#users tr:hover {
-    background: rgba(255,255,255,0.18);
 }
 
 #users td:first-child {
@@ -172,6 +169,10 @@ body {
 
     gap: 20px;
     padding: 20px;
+}
+
+.player_playing {
+    background: rgba(255,255,255,0.18);
 }
 
 /* Card Component */
