@@ -6,7 +6,11 @@ const app = express();
 
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, "../public")));
+app.get("/healthz", (_req, res) => {
+  res.status(200).json({ ok: true });
+});
+
+app.use(express.static(path.join(__dirname, "../frontend/public")));
 
 app.use(morgan("dev"));
 

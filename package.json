@@ -4,23 +4,28 @@
   "description": "Creando el juego del Uno usando WebSockets con Typescript y Node.js",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./build/server.js",
-    "build": "tsc -p ./server/tsconfig.json",
-    "start:build": "tsc -p ./server/tsconfig.json | nodemon ./build/server.js"
+    "start": "node ./build/server.js",
+    "start:dev": "nodemon ./build/server.js",
+    "build:server": "tsc -p ./server/tsconfig.json",
+    "build:frontend": "tsc -p ./frontend/tsconfig.json",
+    "build": "npm run build:server && npm run build:frontend",
+    "start:build": "npm run build && npm run start",
+    "render:build": "npm run build && npm prune --omit=dev"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@types/morgan": "^1.9.10",
-    "morgan": "^1.10.1",
-    "nodemon": "^3.1.14"
-  },
   "dependencies": {
-    "@types/express": "^5.0.6",
-    "@types/ws": "^8.18.1",
     "express": "^5.2.1",
-    "undici-types": "^7.24.0",
+    "morgan": "^1.10.1",
     "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.5.2",
+    "@types/ws": "^8.18.1",
+    "nodemon": "^3.1.14",
+    "typescript": "^5.9.2"
   }
 }

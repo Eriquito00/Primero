@@ -370,10 +370,15 @@ function getCardLabel(value: string): string {
 function getWsUrl(): string {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const configuredHost = localStorage.getItem("primero.wsHost")?.trim();
+  const isLocalHost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
   const host =
     configuredHost && configuredHost.length > 0
       ? configuredHost
-      : `${window.location.hostname}:3000`;
+      : isLocalHost
+        ? `${window.location.hostname}:3000`
+        : window.location.host;
   return `${protocol}//${host}`;
 }
 

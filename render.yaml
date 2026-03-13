@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: primero
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run render:build
+    startCommand: npm run start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20
