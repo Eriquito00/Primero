@@ -18,9 +18,7 @@ export function validatePlay(cardData) {
      *  - Coincide: Perfecto se devuelve true
      *  - No coincide: Pues se devolvera false
      */
-    if (cardData.color === "red")
-        return false;
-    if (cardData.number < 4)
+    if (cardData.color === "red" || cardData.color === "yellow")
         return false;
     return true;
 }
@@ -62,5 +60,5 @@ export function addCard(table, board) {
     const COLORS = ["red", "blue", "green", "yellow"];
     const color = COLORS[Math.floor(Math.random() * COLORS.length)];
     const number = Math.floor(Math.random() * 10);
-    board.appendChild(new Card(color, number).createCard());
+    board.appendChild(new Card(color, number.toString()).createCard());
 }

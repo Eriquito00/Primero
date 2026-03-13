@@ -10,7 +10,7 @@ import { user_cards } from "./game.js";
  * @param cardData Datos de la carta, color y numero
  * @returns True si es valida False si no es valida
  */
-export function validatePlay(cardData: { color: string, number: number }): boolean {
+export function validatePlay(cardData: { color: string, value: string }): boolean {
     /**
      * Aqui para probar y tener aqui una funcioncilla que permita o no cartas tenia esto
      * pero era para probar.
@@ -20,14 +20,13 @@ export function validatePlay(cardData: { color: string, number: number }): boole
      *  - Coincide: Perfecto se devuelve true
      *  - No coincide: Pues se devolvera false
      */
-    if (cardData.color === "red") return false;
-    if (cardData.number < 4) return false;
+    if (cardData.color === "red" || cardData.color === "yellow") return false;
     return true;
 }
 
 export function throwCard(e: Event, dropZone: HTMLElement, table: HTMLTableElement) {
     dropZone.classList.remove("drop_over");
-    const data = JSON.parse((e as DragEvent).dataTransfer!.getData("application/json")) as { color: string, number: number };
+    const data = JSON.parse((e as DragEvent).dataTransfer!.getData("application/json")) as { color: string, value: string };
 
     // Comprovar si es el turno del usuario
     if (validatePlay(data)) {
@@ -73,5 +72,5 @@ export function addCard(table: HTMLTableElement, board: HTMLElement) {
     const COLORS = ["red", "blue", "green", "yellow"] as const;
     const color = COLORS[Math.floor(Math.random() * COLORS.length)];
     const number = Math.floor(Math.random() * 10);
-    board.appendChild(new Card(color, number).createCard());
+    board.appendChild(new Card(color, number.toString()).createCard());
 }

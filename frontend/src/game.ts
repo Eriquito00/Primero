@@ -16,13 +16,19 @@ const ws = new WebSocket(`${protocol}//${window.location.host}`);
 
 //Esta array de cartas es mientras el servidor no reparta las cartas a los jugadores
 export const cards = [
-    new Card("red", 1).createCard(),
-    new Card("blue", 2).createCard(),
-    new Card("green", 3).createCard(),
-    new Card("yellow", 4).createCard(),
-    new Card("red", 5).createCard(),
-    new Card("blue", 6).createCard(),
-    new Card("green", 7).createCard(),
+    new Card("red", "1").createCard(),
+    new Card("blue", "2").createCard(),
+    new Card("green", "3").createCard(),
+    new Card("yellow", "4").createCard(),
+    new Card("red", "5").createCard(),
+    new Card("blue", "6").createCard(),
+    new Card("green", "7").createCard(),
+    new Card("yellow", "8").createCard(),
+    new Card("red", "9").createCard(),
+    new Card("blue", "🛇").createCard(),
+    new Card("green", "⟲").createCard(),
+    new Card("yellow", "+2").createCard(),
+
 ];
 cards.forEach(e => { board.appendChild(e); });
 

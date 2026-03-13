@@ -25,9 +25,9 @@ export function createRows(playersInfo: Record<string, number>, tableElement: HT
     }
 }
 
-export function showCardInThrowZone(dropZone: HTMLElement, cardData: { color: string, number: number }) {
+export function showCardInThrowZone(dropZone: HTMLElement, cardData: { color: string, value: string }) {
     dropZone.textContent = "";
-    const thrownCard = new Card(cardData.color, cardData.number).createCard();
+    const thrownCard = new Card(cardData.color, cardData.value).createCard();
     addAtributes(thrownCard, { "draggable": "false" });
     dropZone.appendChild(thrownCard);
 }
