@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "Creando el juego del Uno usando WebSockets con Typescript y Node.js",
   "main": "index.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
+    "prestart": "node ./scripts/ensure-build.js",
     "start": "node ./build/server.js",
     "start:dev": "nodemon ./build/server.js",
     "build:server": "tsc -p ./server/tsconfig.json",
