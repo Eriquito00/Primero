@@ -5,6 +5,7 @@ import {
   drawCard,
   joinRoom,
   playCard,
+  reconnectToGame,
   sayUno,
   startGame,
 } from "./game";
@@ -41,6 +42,10 @@ const gameCatchUnoHandler: WSHandler = (payload, ctx) => {
   return catchUno(ctx.playerId, payload);
 };
 
+const gameReconnectHandler: WSHandler = (payload, ctx) => {
+  return reconnectToGame(ctx.playerId, ctx.ws, payload);
+};
+
 export const handlers: Record<string, WSHandler> = {
   ping: pingHandler,
   "room.create": roomCreateHandler,
@@ -50,4 +55,5 @@ export const handlers: Record<string, WSHandler> = {
   "game.drawCard": gameDrawCardHandler,
   "game.sayUno": gameSayUnoHandler,
   "game.catchUno": gameCatchUnoHandler,
+  "game.reconnect": gameReconnectHandler,
 };

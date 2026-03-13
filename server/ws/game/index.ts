@@ -7,5 +7,10 @@ export type {
   RoomStatus,
 } from "./types";
 
-export { createRoom, joinRoom, leaveOnDisconnect } from "./rooms";
+export {
+  createRoom,
+  joinRoom,
+  leaveOnDisconnect,
+  reconnectToGame,
+} from "./rooms";
 export { startGame, playCard, drawCard, sayUno, catchUno } from "./actions";

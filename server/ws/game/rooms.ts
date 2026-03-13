@@ -1,10 +1,16 @@
 import WebSocket from "ws";
 import { ClientFailError } from "../protocol";
 import { shuffle } from "./deck";
-import { broadcastSimple, broadcastState } from "./events";
+import { broadcastSimple, broadcastState, buildStateForPlayer } from "./events";
 import { ensureName } from "./shared";
-import { playerToRoom, rooms } from "./store";
-import { Room } from "./types";
+import {
+  RECONNECT_WINDOW_MS,
+  disconnected,
+  disconnectTimers,
+  playerToRoom,
+  rooms,
+} from "./store";
+import { Room, Player } from "./types";
 
 function generateRoomCode(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -101,35 +107,62 @@ export function joinRoom(playerId: string, ws: WebSocket, payload: unknown) {
 
 export function leaveOnDisconnect(playerId: string) {
   const code = playerToRoom.get(playerId);
-  if (!code) {
-    return;
-  }
+  if (!code) return;
 
   const room = rooms.get(code);
   playerToRoom.delete(playerId);
-
-  if (!room) {
-    return;
-  }
+  if (!room) return;
 
   const index = room.players.findIndex((p) => p.id === playerId);
-  if (index === -1) {
-    return;
-  }
+  if (index === -1) return;
 
   const leaving = room.players[index];
 
-  room.deck.push(...leaving.hand);
-  room.deck = shuffle(room.deck);
+  // Durante una partida activa guardamos al jugador en ventana de reconexión
+  // para que la navegación entre páginas no lo expulse permanentemente.
+  if (room.status === "playing") {
+    const key = leaving.name.toLowerCase() + ":" + code;
 
-  room.players.splice(index, 1);
+    // Si ya había una entrada previa, limpiar el timer anterior
+    const prev = disconnectTimers.get(key);
+    if (prev !== undefined) clearTimeout(prev);
 
-  if (room.players.length === 0) {
-    rooms.delete(room.code);
+    disconnected.set(key, { room, player: leaving });
+
+    const timer = setTimeout(() => {
+      disconnected.delete(key);
+      disconnectTimers.delete(key);
+      // Expulsar definitivamente si no se ha reconectado
+      const currentIndex = room.players.findIndex((p) => p.id === leaving.id);
+      if (currentIndex !== -1) {
+        actuallyRemovePlayer(room, leaving, currentIndex, code);
+      }
+    }, RECONNECT_WINDOW_MS);
+
+    disconnectTimers.set(key, timer);
     return;
   }
 
-  if (room.ownerId === playerId) {
+  // En sala de espera se elimina de inmediato
+  actuallyRemovePlayer(room, leaving, index, code);
+}
+
+function actuallyRemovePlayer(
+  room: Room,
+  leaving: Player,
+  index: number,
+  code: string,
+) {
+  room.deck.push(...leaving.hand);
+  room.deck = shuffle(room.deck);
+  room.players.splice(index, 1);
+
+  if (room.players.length === 0) {
+    rooms.delete(code);
+    return;
+  }
+
+  if (room.ownerId === leaving.id) {
     room.ownerId = room.players[0].id;
   }
 
@@ -147,9 +180,8 @@ export function leaveOnDisconnect(playerId: string) {
       winnerName: room.players[0].name,
       reason: "Resto de jugadores desconectados",
     });
-
     playerToRoom.delete(room.players[0].id);
-    rooms.delete(room.code);
+    rooms.delete(code);
     return;
   }
 
@@ -158,4 +190,54 @@ export function leaveOnDisconnect(playerId: string) {
     playerName: leaving.name,
   });
   broadcastState(room);
+}
+
+export function reconnectToGame(
+  playerId: string,
+  ws: WebSocket,
+  payload: unknown,
+) {
+  const obj = (payload ?? {}) as { name?: unknown; code?: unknown };
+  const name = ensureName(obj.name);
+
+  if (typeof obj.code !== "string" || obj.code.trim() === "") {
+    throw new ClientFailError("code es obligatorio");
+  }
+
+  const code = obj.code.trim().toUpperCase();
+  const room = rooms.get(code);
+  if (!room) throw new ClientFailError("Sala no encontrada");
+
+  // Ya conectado con este mismo playerId
+  if (playerToRoom.get(playerId) === code) {
+    return buildStateForPlayer(room, playerId);
+  }
+
+  if (room.status === "waiting") {
+    // Sala en espera: delegar en joinRoom normal
+    return joinRoom(playerId, ws, payload);
+  }
+
+  // Partida en curso: buscar en la ventana de reconexión
+  const key = name.toLowerCase() + ":" + code;
+  const entry = disconnected.get(key);
+
+  if (entry !== undefined) {
+    const timer = disconnectTimers.get(key);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      disconnectTimers.delete(key);
+    }
+
+    const player = entry.player;
+    player.ws = ws;
+    player.id = playerId;
+    playerToRoom.set(playerId, code);
+    disconnected.delete(key);
+
+    broadcastState(room);
+    return buildStateForPlayer(room, playerId);
+  }
+
+  throw new ClientFailError("La partida ya empezó y no se puede unir ahora");
 }

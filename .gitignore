@@ -140,3 +140,5 @@ vite.config.ts.timestamp-*
 
 # js compiles files
 build
+
+frontend/public/js/
