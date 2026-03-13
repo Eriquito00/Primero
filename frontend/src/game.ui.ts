@@ -32,12 +32,22 @@ export function createRows(
   }
 }
 
+function cardLabel(value: string): string {
+  if (value === "skip") return "⊘";
+  if (value === "reverse") return "↺";
+  if (value === "draw2") return "+2";
+  return value;
+}
+
 export function showCardInThrowZone(
   dropZone: HTMLElement,
   cardData: { color: string; value: string },
 ) {
   dropZone.textContent = "";
-  const thrownCard = new Card(cardData.color, cardData.value).createCard();
+  const thrownCard = new Card(
+    cardData.color,
+    cardLabel(cardData.value),
+  ).createCard();
   addAtributes(thrownCard, { draggable: "false" });
   dropZone.appendChild(thrownCard);
 }

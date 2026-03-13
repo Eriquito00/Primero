@@ -101,10 +101,24 @@ async function initGame() {
     wsClient = new WsClient();
     await wsClient.connect(getWsUrl());
 
-    // Estado actualizado en tiempo real
+    // Estado actualizado en tiempo real + ventana de cazar UNO
+    const catchWindowOpen = new Set<string>();
     wsClient.on("game.state", (msg) => {
       const state = msg.data as GameState | undefined;
-      if (state !== undefined) renderGameState(state);
+      if (state === undefined) return;
+      renderGameState(state);
+      for (const p of state.players) {
+        if (
+          p.id !== state.self.id &&
+          p.handCount === 1 &&
+          !p.saidUno &&
+          !catchWindowOpen.has(p.id)
+        ) {
+          catchWindowOpen.add(p.id);
+          showCatchButton(p.id, p.name, () => catchWindowOpen.delete(p.id));
+        }
+        if (p.handCount !== 1 || p.saidUno) catchWindowOpen.delete(p.id);
+      }
     });
 
     // Fin de partida
@@ -120,13 +134,13 @@ async function initGame() {
       window.location.href = "./../";
     });
 
-    // Alguien dijo UNO → mostrar botón de cazar
+    // game.uno: solo notificación visual, el botón de cazar ya sale por game.state
     wsClient.on("game.uno", (msg) => {
       const data = msg.data as
         | { playerId: string; playerName: string }
         | undefined;
       if (data !== undefined && data.playerId !== currentState?.self.id) {
-        showCatchButton(data.playerId, data.playerName);
+        showNotification(`¡${data.playerName} dijo UNO!`);
       }
     });
 
@@ -158,11 +172,13 @@ async function initGame() {
     if (state !== undefined) renderGameState(state);
   } catch (error) {
     const wsError = error as { data?: { reason?: string }; message?: string };
-    alert(
-      wsError.data?.reason ??
-        wsError.message ??
-        "No se pudo conectar con la partida.",
-    );
+    // «Socket cerrado» ocurre cuando el servidor cierra la conexión de forma natural
+    // (navegación, fin de partida). No mostrar alert en ese caso.
+    const msg = wsError.data?.reason ?? wsError.message ?? "";
+    if (msg === "Socket cerrado" || msg === "") {
+      return;
+    }
+    alert(msg);
     window.location.href = "./../";
     return;
   }
@@ -301,7 +317,11 @@ async function catchUno(targetPlayerId: string) {
 }
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
-function showCatchButton(targetId: string, targetName: string) {
+function showCatchButton(
+  targetId: string,
+  targetName: string,
+  onExpire?: () => void,
+) {
   document.getElementById("catch_uno_btn")?.remove();
 
   const btn = document.createElement("button");
@@ -327,11 +347,15 @@ function showCatchButton(targetId: string, targetName: string) {
   btn.onclick = () => {
     void catchUno(targetId);
     btn.remove();
+    onExpire?.();
   };
   document.body.appendChild(btn);
 
   // Auto-desaparecer a los 5 segundos
-  setTimeout(() => btn.remove(), 5000);
+  setTimeout(() => {
+    btn.remove();
+    onExpire?.();
+  }, 5000);
 }
 
 function showNotification(text: string, duration = 3000) {
