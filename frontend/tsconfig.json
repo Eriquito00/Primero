@@ -2,6 +2,9 @@
     "compilerOptions": {
         "target": "esnext",
         "module": "esnext",
+        "moduleResolution": "bundler",
+        "lib": ["DOM", "ESNext"],
+        "types": [],
         "sourceMap": false,
         "noEmitOnError": true,
         "noImplicitAny": true,
@@ -9,5 +12,7 @@
         "allowSyntheticDefaultImports": true,
         "outDir": "./public/js",
         "rootDir": "./src/"
-    }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["../node_modules", "node_modules"]
 }

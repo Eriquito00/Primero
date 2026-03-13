@@ -6,9 +6,16 @@ const create_room = document.getElementById("create_room") as HTMLButtonElement;
 create_room.addEventListener("click", () => { createRoom(username.value); });
 submit.addEventListener("click", () => { enterRoom(username.value, code.value); });
 
+const STORAGE_KEYS = {
+    name: "primero.name",
+    code: "primero.code"
+};
+
 function createRoom(username: string) {
     if (validateInfo(username)) {
-        connectWS(username);
+        const name = username.trim();
+        sessionStorage.setItem(STORAGE_KEYS.name, name);
+        window.location.href = "./room/index.html?create=1";
     }
     else {
         alert("El username tiene que ser de 8 caracteres o mas y el codigo de 6 caracteres.")
@@ -17,29 +24,28 @@ function createRoom(username: string) {
 
 function enterRoom(username: string, code: string) {
     if (validateInfo(username, code)) {
-        connectWS(username, code);
+        const name = username.trim();
+        const roomCode = code.trim().toUpperCase();
+        persistSession(name, roomCode);
+        goToRoom(roomCode);
     }
     else {
         alert("El username tiene que ser de 8 caracteres o mas y el codigo de 6 caracteres.")
     }
 }
 
-function connectWS(username: string, code?: string) {
-    /**
-     * Abrir una conexion ws o wss.
-     * Mandar el codigo y el username al backend
-     * EL CODIGO ES VALIDO
-     *      El backend se guarda el username y asocia ese usuario
-     *      a la partida de ese codigo y se redirige a la sala en
-     *      de espera.
-     * EL CODIGO NO ES VALIDO
-     *      Sale un alert conforme el codigo de esa sala no es valido
-     */
-    const codigo = code === undefined ? "AAAAAA" : code;
-    window.location.href = `./room/index.html?code=${codigo}`;
+function persistSession(name: string, roomCode: string) {
+    sessionStorage.setItem(STORAGE_KEYS.name, name);
+    sessionStorage.setItem(STORAGE_KEYS.code, roomCode);
+}
+
+function goToRoom(roomCode: string) {
+    window.location.href = `./room/index.html?code=${encodeURIComponent(roomCode)}`;
 }
 
 function validateInfo(username: string, code?: string): boolean {
     if (code === undefined) return username.length >= 8;
     return username.length >= 8 && code.length === 6;
 }
+
+export {};

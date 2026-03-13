@@ -1,32 +1,99 @@
-export class WebSocketService {
-    private socket: WebSocket;
+export type ServerMsg = {
+    status: "success" | "fail" | "error";
+    type?: string;
+    id?: string;
+    data?: unknown;
+    message?: string;
+};
 
-    constructor(url: string) {
-        this.socket = new WebSocket(url);
+type Pending = {
+    resolve: (value: ServerMsg) => void;
+    reject: (reason?: unknown) => void;
+};
 
-        this.socket.onopen = () => {
-            console.log("WebSocket conectado");
-        };
+export class WsClient {
+    private ws: WebSocket | null = null;
+    private pending = new Map<string, Pending>();
+    private listeners = new Map<string, Set<(msg: ServerMsg) => void>>();
+    private seq = 0;
 
-        this.socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log("Mensaje recibido:", data);
-        };
+    connect(url: string): Promise<void> {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            return Promise.resolve();
+        }
 
-        this.socket.onclose = () => {
-            console.log("WebSocket cerrado");
-        };
+        this.ws = new WebSocket(url);
 
-        this.socket.onerror = (error) => {
-            console.error("WebSocket error:", error);
-        };
+        return new Promise((resolve, reject) => {
+            if (this.ws === null) {
+                reject(new Error("Socket no inicializado"));
+                return;
+            }
+
+            this.ws.onopen = () => {
+                resolve();
+            };
+
+            this.ws.onerror = () => {
+                reject(new Error("Error al conectar WebSocket"));
+            };
+
+            this.ws.onmessage = (ev) => {
+                let msg: ServerMsg;
+
+                try {
+                    msg = JSON.parse(ev.data as string) as ServerMsg;
+                }
+                catch {
+                    return;
+                }
+
+                if (msg.id !== undefined && this.pending.has(msg.id)) {
+                    const p = this.pending.get(msg.id);
+                    this.pending.delete(msg.id);
+                    if (p !== undefined) {
+                        if (msg.status === "success") p.resolve(msg);
+                        else p.reject(msg);
+                    }
+                    return;
+                }
+
+                const type = msg.type ?? "";
+                const set = this.listeners.get(type);
+                if (set !== undefined) {
+                    for (const cb of set) cb(msg);
+                }
+            };
+
+            this.ws.onclose = () => {
+                for (const [, p] of this.pending) {
+                    p.reject(new Error("Socket cerrado"));
+                }
+                this.pending.clear();
+            };
+        });
     }
 
-    send(data: object) {
-        this.socket.send(JSON.stringify(data));
+    on(type: string, cb: (msg: ServerMsg) => void) {
+        if (!this.listeners.has(type)) this.listeners.set(type, new Set());
+        this.listeners.get(type)?.add(cb);
+        return () => this.listeners.get(type)?.delete(cb);
     }
 
-    getInstance() {
-        return this.socket;
+    request(type: string, payload: unknown): Promise<ServerMsg> {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+            return Promise.reject(new Error("Socket no conectado"));
+        }
+
+        const id = `req_${Date.now()}_${this.seq++}`;
+
+        return new Promise<ServerMsg>((resolve, reject) => {
+            this.pending.set(id, { resolve, reject });
+            this.ws?.send(JSON.stringify({ id, type, payload }));
+        });
+    }
+
+    close() {
+        this.ws?.close();
     }
 }

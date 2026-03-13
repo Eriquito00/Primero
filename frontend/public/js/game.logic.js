@@ -1,8 +1,7 @@
 import "./components/Card.js";
 import { Card, draggedCard } from "./components/Card.js";
 import { loadPlayers, showCardInThrowZone } from "./game.ui.js";
-// Este import es por el diccionario y las cartas provisional
-import { user_cards } from "./game.js";
+const user_cards = {};
 /**
  * Pasar las comprovaciones de una jugada de un jugador
  * @param cardData Datos de la carta, color y numero

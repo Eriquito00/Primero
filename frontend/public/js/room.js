@@ -1,21 +1,138 @@
-"use strict";
 const room_code = document.getElementById("room_code");
 const start_game = document.getElementById("start_game");
-const urlParams = new URLSearchParams(window.location.search);
-const codigo = urlParams.get("code");
-if (codigo === null)
-    window.location.href = "./../";
-else
-    room_code.innerText = codigo;
-start_game.addEventListener("click", () => { startGame(); });
-function startGame() {
-    /**
-     * Aqui lo ideal serian 2 cosas:
-     *      1. Que todos puedan darle pero que solo si el admin le da
-     *      empieza y al resto le salga alert.
-     *      2. Que el boton de empezar este deshabilitado y solo cuando el admin
-     *      se mete a esta pagina le salga que puede darle.
-     * Y una vez darle al boton que te lleve a lo que seria el apartado del juego.
-     */
-    window.location.href = "./../game/";
+const STORAGE_KEYS = {
+    name: "primero.name",
+    code: "primero.code",
+    state: "primero.roomState"
+};
+let currentRoomState = null;
+let clientRef = null;
+void initRoom();
+async function initRoom() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const createMode = urlParams.get("create") === "1";
+    let roomCode = urlParams.get("code")?.toUpperCase() ?? sessionStorage.getItem(STORAGE_KEYS.code) ?? "";
+    const name = sessionStorage.getItem(STORAGE_KEYS.name) ?? "";
+    if (name.length < 1 || (!createMode && roomCode.length !== 6)) {
+        window.location.href = "./../";
+        return;
+    }
+    if (roomCode.length === 6) {
+        room_code.innerText = roomCode;
+        sessionStorage.setItem(STORAGE_KEYS.code, roomCode);
+    }
+    const playersList = ensurePlayersList();
+    try {
+        const { WsClient } = await import("./services/websocket.js");
+        const wsClient = new WsClient();
+        clientRef = wsClient;
+        await wsClient.connect(getWsUrl());
+        if (createMode) {
+            const createResponse = await wsClient.request("room.create", { name });
+            const createdCode = createResponse.data?.code;
+            if (createdCode === undefined) {
+                throw new Error("El backend no devolvio un codigo de sala.");
+            }
+            roomCode = createdCode.toUpperCase();
+            room_code.innerText = roomCode;
+            sessionStorage.setItem(STORAGE_KEYS.code, roomCode);
+            window.history.replaceState(null, "", `./index.html?code=${encodeURIComponent(roomCode)}`);
+        }
+        const onRoomState = (msg) => {
+            const state = msg.data;
+            if (state !== undefined) {
+                updateRoomState(state, playersList);
+            }
+        };
+        wsClient.on("room.state", onRoomState);
+        wsClient.on("room state", onRoomState);
+        wsClient.on("game.state", (msg) => {
+            if (msg.data !== undefined) {
+                sessionStorage.setItem(STORAGE_KEYS.state, JSON.stringify(msg.data));
+            }
+            window.location.href = `./../game/index.html?code=${encodeURIComponent(roomCode)}`;
+        });
+        const joinResponse = await joinWithReconnect(wsClient, name, roomCode);
+        const joinedState = joinResponse.data;
+        if (joinedState !== undefined) {
+            updateRoomState(joinedState, playersList);
+        }
+    }
+    catch (error) {
+        const wsError = error;
+        alert(wsError.message ?? "No se pudo conectar a la sala.");
+        window.location.href = "./../";
+        return;
+    }
+    start_game.addEventListener("click", () => {
+        void startGame(roomCode);
+    });
 }
+async function joinWithReconnect(wsClient, name, roomCode) {
+    try {
+        return await wsClient.request("room.join", { name, code: roomCode });
+    }
+    catch (error) {
+        const wsError = error;
+        if (wsError.message !== "Socket cerrado")
+            throw error;
+        await wsClient.connect(getWsUrl());
+        return wsClient.request("room.join", { name, code: roomCode });
+    }
+}
+async function startGame(roomCode) {
+    if (clientRef === null) {
+        alert("Conexion no disponible.");
+        return;
+    }
+    try {
+        await clientRef.request("game.start", { code: roomCode });
+        window.location.href = `./../game/index.html?code=${encodeURIComponent(roomCode)}`;
+    }
+    catch (error) {
+        const wsError = error;
+        alert(wsError.message ?? "No se pudo iniciar la partida.");
+    }
+}
+function updateRoomState(state, playersList) {
+    currentRoomState = state;
+    sessionStorage.setItem(STORAGE_KEYS.state, JSON.stringify(state));
+    renderPlayers(state.players, playersList);
+    if (state.status === "playing") {
+        window.location.href = `./../game/index.html?code=${encodeURIComponent(state.code)}`;
+    }
+}
+function ensurePlayersList() {
+    const container = document.querySelector(".room_container");
+    let list = document.getElementById("players_list");
+    if (list !== null)
+        return list;
+    const title = document.createElement("h3");
+    title.innerText = "Jugadores";
+    list = document.createElement("ul");
+    list.id = "players_list";
+    container.appendChild(title);
+    container.appendChild(list);
+    return list;
+}
+function renderPlayers(players, list) {
+    list.innerHTML = "";
+    for (const player of players) {
+        const item = document.createElement("li");
+        item.innerText = `${player.name} (${player.hand.length} cartas)`;
+        list.appendChild(item);
+    }
+}
+function getWsUrl() {
+    const configuredHost = localStorage.getItem("primero.wsHost");
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = configuredHost && configuredHost.trim().length > 0
+        ? configuredHost.trim()
+        : window.location.host;
+    return `${protocol}//${host}`;
+}
+window.addEventListener("beforeunload", () => {
+    currentRoomState = null;
+    clientRef?.close();
+});
+export {};
