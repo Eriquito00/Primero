@@ -239,5 +239,21 @@ export function reconnectToGame(
     return buildStateForPlayer(room, playerId);
   }
 
+  // No está en ventana de reconexión, pero puede estar en la sala con otro playerId
+  // (navegación intencional room.html → game.html genera un nuevo WebSocket con nuevo playerId)
+  const playerName = name.toLowerCase();
+  const existingPlayer = room.players.find((p) => p.name.toLowerCase() === playerName);
+  if (existingPlayer !== undefined && existingPlayer.ws !== ws) {
+    const oldPlayerId = existingPlayer.id;
+    existingPlayer.ws = ws;
+    existingPlayer.id = playerId;
+    playerToRoom.set(playerId, code);
+    // Limpiar la asignación anterior para que no quede un playerId huérfano
+    playerToRoom.delete(oldPlayerId);
+
+    broadcastState(room);
+    return buildStateForPlayer(room, playerId);
+  }
+
   throw new ClientFailError("La partida ya empezó y no se puede unir ahora");
 }
