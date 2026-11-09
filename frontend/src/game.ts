@@ -402,7 +402,9 @@ function getWsUrl(): string {
       ? configuredHost
       : isLocalHost
         ? `${window.location.hostname}:3000`
-        : window.location.host;
+        : window.location.hostname === "ericmejias.es" || window.location.hostname === "www.ericmejias.es"
+          ? "primero-tzxm.onrender.com"
+          : window.location.host;
   return `${protocol}//${host}`;
 }
 
