@@ -1,22 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./styles/style.css">
     <script type="module" src="./js/script.js"></script>
     <link rel="icon" href="./assets/primero_logo.png" type="image/png">
-    <title>Primero</title>
+    <title>Primero: cartas multijugador | Eric Mejias Gamonal</title>
+    <meta name="description" content="Crea una sala y juega a Primero con tus amigos en el navegador. Proyecto de cartas multijugador con TypeScript y WebSockets de Eric Mejias Gamonal (Eriquito00).">
+    <link rel="canonical" href="https://ericmejias.es/primero/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ericmejias.es/primero/">
+    <meta property="og:title" content="Primero: juego de cartas multijugador">
+    <meta property="og:description" content="Crea una sala, comparte su código y juega con tus amigos. Un proyecto de Eric Mejias Gamonal (Eriquito00).">
 </head>
 <body>
-    <section class="card join_card">
-        <h1>Entra a una sala</h1>
+    <main class="card join_card">
+        <h1>Primero: cartas multijugador</h1>
+        <p>Crea una sala o introduce su código para jugar con tus amigos en el navegador. Se necesitan al menos dos jugadores para comenzar.</p>
+        <p>Un proyecto de <a href="https://ericmejias.es/">Eric Mejias Gamonal (Eriquito00)</a>, desarrollado con TypeScript, Node.js y WebSockets. <a href="https://github.com/Eriquito00/Primero">Código de Primero en GitHub</a>.</p>
         <label for="username">Nombre de usuario:</label>
         <input class="input_text" type="text" name="username" id="username" minlength="2">
         <label for="code">Codigo de sala:</label>
         <input class="input_text input_code" type="text" name="code" id="code" maxlength="6">
         <button class="btn btn_join" id="submit">Entrar</button>
         <button class="btn btn_room" id="create_room">Crear sala</button>
-    </section>
+    </main>
 </body>
 </html>
